@@ -80,10 +80,49 @@ func NewUsers() *Users {
 	}
 }
 
-// our local storage solution
+// our local storage solution - defined package-wide
 var users = NewUsers()
 
 // FUNCTIONS
+
+func validateDate(date string) bool {
+	date_arr := strings.Split(date, "/")
+	if len(date_arr) != 3 {
+		// fmt.Println("Error: Invalid date format.")
+		return false
+	}
+	// check for valid month
+	month, err := strconv.Atoi(date_arr[0])
+	if err != nil {
+		// fmt.Println("Error: Invalid month.")
+		return false
+	}
+	if month < 1 || month > 12 {
+		// fmt.Println("Error: Invalid month.")
+		return false
+	}
+	// check for valid day
+	day, err := strconv.Atoi(date_arr[1])
+	if err != nil {
+		// fmt.Println("Error: Invalid day.")
+		return false
+	}
+	if day < 1 || day > 31 {
+		// fmt.Println("Error: Invalid day.")
+		return false
+	}
+	// check for valid year
+	year, err := strconv.Atoi(date_arr[2])
+	if err != nil {
+		// fmt.Println("Error: Invalid year.")
+		return false
+	}
+	if year < 2000 || year > 2050 {
+		// fmt.Println("Error: Invalid year.")
+		return false
+	}
+	return true
+}
 
 // opens a file and reads it into a list of transactions
 func readCSV(filePath string) *[]Transaction {
@@ -123,6 +162,11 @@ func readCSV(filePath string) *[]Transaction {
 		customerID := strings.TrimSpace(line[0])
 		// parse date
 		date := strings.TrimSpace(line[1])
+		// check for valid date format
+		if !validateDate(date) {
+			// fmt.Println("Error: Invalid date format.")
+			continue
+		}
 		// parse amount
 		amount, err := strconv.Atoi(strings.TrimSpace(line[2]))
 		if err != nil {
@@ -179,6 +223,11 @@ func storeTransactions(transactions *[]Transaction) {
 }
 
 func calculateBalances() {
+	// get transactions for each user
+	// iterate through transactions
+	// for each transaction, check the date
+	// use a map to store the balances for each month
+	// keep track of the min and max balances as updates are made
 
 }
 
