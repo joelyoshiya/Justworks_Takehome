@@ -117,7 +117,7 @@ func validateDate(date string) bool {
 		// fmt.Println("Error: Invalid year.")
 		return false
 	}
-	if year < 2000 || year > 2050 {
+	if year < 1900 || year > 2050 {
 		// fmt.Println("Error: Invalid year.")
 		return false
 	}
@@ -182,7 +182,6 @@ func readCSV(filePath string) *[]Transaction {
 		// append transaction to list of transactions
 		transactions = append(transactions, transaction)
 	}
-
 	// return list of transactions
 	return &transactions
 }
@@ -232,10 +231,14 @@ func calculateBalances() {
 }
 
 func storeBalances() {
+	// run calculateBalances()
+	// store balances in local storage
 
 }
 
 func writeCSV() {
+	// retrieve balances from local storage, sorted by customerID
+	// write balances to CSV file
 
 }
 
@@ -245,12 +248,6 @@ func main() {
 
 	// Read CSV file
 	transactions := readCSV(os.Args[1])
-
-	// print transactions
-	// for _, transaction := range *transactions {
-	// 	fmt.Printf("%v\n", transaction)
-	// }
-	// println(strconv.FormatInt(int64(len(*transactions)), 10))
 
 	// Store transactions in local storage
 	storeTransactions(transactions)
