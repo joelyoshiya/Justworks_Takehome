@@ -46,17 +46,25 @@ type Transaction struct {
 // Define a balance struct
 type Balance struct {
 	CustomerID    string
-	MonthYear     string
+	Month         string
 	MinBalance    int
 	MaxBalance    int
 	EndingBalance int
 }
 
+// Define a slice of balances
+type Balances []Balance
+
+// Constructor for Balances struct
+func NewBalances() {
+	make(Balances, 12) // for 12 months
+}
+
 // Define a user struct
 type User struct {
 	CustomerID   string
-	Transactions []Transaction // each item will be an individual transaction - multiple allowed per day, month, year
-	Balances     []Balance     // each item will be a balance for a month
+	Transactions []Transaction        // each item will be an individual transaction - multiple allowed per day, month, year
+	YearBalances map[string][]Balance // map where key is the year. Each year will hold slice of balance structs for each month
 }
 
 // Define a users struct
@@ -208,7 +216,7 @@ func storeTransactions(transactions *[]Transaction) {
 			newUser := User{
 				CustomerID:   custemerID,
 				Transactions: []Transaction{transaction},
-				Balances: make([]Balance, 12), // of length 12, one for each month
+				YearBalances: make(map[string][]Balance),
 			}
 			// write lock
 			users.Lock()
@@ -227,12 +235,14 @@ func calculateBalances() {
 			// add transaction amount to balance for that month
 			// if balance is less than min balance, update min balance
 			// if balance is greater than max balance, update max balance
+			continue
 		}
 
-	// iterate through transactions
-	// for each transaction, check the date
-	// use a map to store the balances for each month
-	// keep track of the min and max balances as updates are made
+		// iterate through transactions
+		// for each transaction, check the date
+		// use a map to store the balances for each month
+		// keep track of the min and max balances as updates are made
+	}
 
 }
 
