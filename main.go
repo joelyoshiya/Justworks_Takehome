@@ -145,7 +145,7 @@ func storeTransactions(transactions *[]Transaction) {
 				CustomerID:   custemerID,
 				Transactions: []Transaction{transaction},
 			}
-			users.UserMap[custemerID] = user
+			users.UserMap[custemerID] = user // update user in local storage with new user object
 		}
 	}
 
@@ -166,17 +166,33 @@ func writeCSV() {
 func main() {
 
 	// TODO - should I initialize the users struct here?
+
 	// Read CSV file
 	transactions := readCSV()
+
 	// print transactions
-	for _, transaction := range *transactions {
-		fmt.Printf("%v\n", transaction)
-	}
-	println(strconv.FormatInt(int64(len(*transactions)), 10))
+	// for _, transaction := range *transactions {
+	// 	fmt.Printf("%v\n", transaction)
+	// }
+	// println(strconv.FormatInt(int64(len(*transactions)), 10))
+
 	// Store transactions in local storage
 	storeTransactions(transactions)
+
+	// print users and their transactions
+	for _, user := range users.UserMap {
+		// print customerID
+		fmt.Printf("CustomerID: %v\n", user.CustomerID)
+		// print transactions
+		for _, transaction := range user.Transactions {
+			fmt.Printf("\t%v\n", transaction)
+		}
+	}
+	// print number of users
+	println(strconv.FormatInt(int64(len(users.UserMap)), 10))
+
 	// Calculate balances for each month, for each user
-	// Create list of strings to write to CSV file
+
 	// Write list of strings to CSV file
 
 }
