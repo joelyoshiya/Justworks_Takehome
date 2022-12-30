@@ -99,14 +99,10 @@ func readCSV() *[]Transaction {
 	var transactions []Transaction
 	// initialize list of transactions
 	transactions = make([]Transaction, 0)
-	// initialize a reader with file
-	// input := bufio.NewScanner(file)
-	// define a new reader with TrimLeadingSpace set to true
-	// this will trim leading spaces from each line
 	// initialize a csv reader
 	csvReader := csv.NewReader(file)
-	csvReader.TrimLeadingSpace = true
-	csvReader.FieldsPerRecord = 3
+	csvReader.TrimLeadingSpace = true // trim leading spaces
+	csvReader.FieldsPerRecord = 3     // set number of fields per record
 	// iterate through file
 	for {
 		// read line
@@ -142,33 +138,6 @@ func readCSV() *[]Transaction {
 		// append transaction to list of transactions
 		transactions = append(transactions, transaction)
 	}
-
-	// for input.Scan() {
-	// 	// parse line into transaction
-	// 	// split line into list of strings
-	// 	line := input.Text()
-	// 	lineList := strings.Split(line, ",")
-	// 	// parse list of strings into transaction
-	// 	// TODO: add error handling for invalid input - consider REGEX for cleaning
-	// 	// parse customerID
-	// 	customerID := strings.TrimSpace(lineList[0])
-	// 	// parse date
-	// 	date := strings.TrimSpace(lineList[1])
-	// 	// parse amount
-	// 	amount, err := strconv.Atoi(strings.TrimSpace(lineList[2]))
-	// 	if err != nil {
-	// 		// if amount is not an integer, log error to stdout
-	// 		fmt.Printf("Error: Amount is not an integer. Error: %v", err)
-	// 	}
-	// 	// create transaction
-	// 	transaction := Transaction{
-	// 		CustomerID: customerID,
-	// 		Date:       date,
-	// 		Amount:     amount,
-	// 	}
-	// 	// append transaction to list of transactions
-	// 	transactions = append(transactions, transaction)
-	// }
 
 	// return list of transactions
 	return &transactions
