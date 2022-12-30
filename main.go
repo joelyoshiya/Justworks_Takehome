@@ -28,6 +28,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 // STRUCTS AND TYPES
@@ -61,7 +62,8 @@ type User struct {
 // Define a users struct
 
 type Users struct {
-	UserMap map[string]User
+	sync.RWMutex // for thread-safe access to the map
+	UserMap      map[string]User
 }
 
 // Define a local storage for users
@@ -105,13 +107,13 @@ func readCSV() *[]Transaction {
 		line := input.Text()
 		lineList := strings.Split(line, ",")
 		// parse list of strings into transaction
-		// TODO: add error handling for invalid input
+		// TODO: add error handling for invalid input - consider REGEX for cleaning
 		// parse customerID
-		customerID := lineList[0]
+		customerID := strings.TrimSpace(lineList[0])
 		// parse date
-		date := lineList[1]
+		date := strings.TrimSpace(lineList[1])
 		// parse amount
-		amount, err := strconv.Atoi(lineList[2])
+		amount, err := strconv.Atoi(strings.TrimSpace(lineList[2]))
 		if err != nil {
 			// if amount is not an integer, log error to stdout
 			fmt.Printf("Error: Amount is not an integer. Error: %v", err)
@@ -133,19 +135,32 @@ func storeTransactions(transactions *[]Transaction) {
 	// takes a pointer to a list of transactions
 	// iterates through list of transactions
 	for _, transaction := range *transactions {
+
 		// check if user exists in local storage
 		custemerID := transaction.CustomerID
-		if user, ok := users.UserMap[custemerID]; ok {
+
+		// read lock
+		users.RLock()
+		user, ok := users.UserMap[custemerID]
+		users.RUnlock()
+
+		if ok {
 			// if user exists, append transaction to user
 			user.Transactions = append(user.Transactions, transaction) // update copy of user transactions
-			users.UserMap[custemerID] = user                           // update user in local storage
+			// write lock
+			users.Lock()
+			users.UserMap[custemerID] = user // update user in local storage
+			users.Unlock()
 		} else {
 			// if user does not exist, create user and append transaction to user
-			user := User{
+			newUser := User{
 				CustomerID:   custemerID,
 				Transactions: []Transaction{transaction},
 			}
-			users.UserMap[custemerID] = user // update user in local storage with new user object
+			// write lock
+			users.Lock()
+			users.UserMap[custemerID] = newUser // update user in local storage with new user object
+			users.Unlock()
 		}
 	}
 
