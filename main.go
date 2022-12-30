@@ -86,9 +86,7 @@ var users = NewUsers()
 // FUNCTIONS
 
 // opens a file and reads it into a list of transactions
-func readCSV() *[]Transaction {
-	// grab csv file path from command line
-	filePath := os.Args[1]
+func readCSV(filePath string) *[]Transaction {
 	// check if file exists
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -197,7 +195,7 @@ func main() {
 	// TODO - should I initialize the users struct here?
 
 	// Read CSV file
-	transactions := readCSV()
+	transactions := readCSV(os.Args[1])
 
 	// print transactions
 	// for _, transaction := range *transactions {
