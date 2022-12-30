@@ -145,9 +145,13 @@ func main() {
 
 	// Read CSV file
 	transactions := readCSV()
+	// print transactions
+	for _, transaction := range *transactions {
+		fmt.Printf("%v\n", transaction)
+	}
+	println(strconv.FormatInt(int64(len(*transactions)), 10))
 	// Store transactions in local storage
 	storeTransactions(transactions)
-
 	// Calculate balances for each month, for each user
 	// Create list of strings to write to CSV file
 	// Write list of strings to CSV file
