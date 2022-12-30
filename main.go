@@ -1,5 +1,13 @@
 package main
 
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+)
+
 // Written by: Joel Yoshiya Foster
 // Email: joel.foster@gmail.com
 // Date: 2022-12-29
@@ -74,14 +82,59 @@ var users = NewUsers()
 
 // FUNCTIONS
 
-func readCSV() {
-	// Read CSV file
-	// Parse CSV file into list of transactions
-	// Return list of transactions
+// opens a file and reads it into a list of transactions
+func readCSV() *[]Transaction {
+	// grab csv file path from command line
+	filePath := os.Args[1]
+	// check if file exists
+	file, err := os.Open(filePath)
+	if err != nil {
+		// if file does not exist, exit program
+		os.Exit(1)
+	}
+	// instantiate list of transactions
+	var transactions []Transaction
+	// initialize list of transactions
+	transactions = make([]Transaction, 0)
+	// use a buffered reader
+	input := bufio.NewScanner(file)
+	for input.Scan() {
+		// parse line into transaction
+		// split line into list of strings
+		line := input.Text()
+		lineList := strings.Split(line, ",")
+		// parse list of strings into transaction
+		// TODO: add error handling for invalid input
+		// parse customerID
+		customerID := lineList[0]
+		// parse date
+		date := lineList[1]
+		// parse amount
+		amount, err := strconv.Atoi(lineList[2])
+		if err != nil {
+			// if amount is not an integer, log error to stdout
+			fmt.Printf("Error: Amount is not an integer. Error: %v", err)
+		}
+		// create transaction
+		transaction := Transaction{
+			CustomerID: customerID,
+			Date:       date,
+			Amount:     amount,
+		}
+		// append transaction to list of transactions
+		transactions = append(transactions, transaction)
+	}
+	// return list of transactions
+	return &transactions
 }
 
-func storeTransactions() {
-	// takes a list of transactions, and ties them to internal user structs
+func storeTransactions(*[]Transaction) {
+	// takes a pointer to a list of transactions
+	// iterates through list of transactions
+	// for each transaction, check if user exists in local storage
+	// if user does not exist, create user and add transaction to user
+	// if user does exist, add transaction to user
+
 }
 
 func storeBalances() {
@@ -89,8 +142,12 @@ func storeBalances() {
 }
 
 func main() {
+
 	// Read CSV file
-	// Parse CSV file into list of transactions
+	transactions := readCSV()
+	// Store transactions in local storage
+	storeTransactions(transactions)
+
 	// Calculate balances for each month, for each user
 	// Create list of strings to write to CSV file
 	// Write list of strings to CSV file
