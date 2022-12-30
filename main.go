@@ -208,6 +208,7 @@ func storeTransactions(transactions *[]Transaction) {
 			newUser := User{
 				CustomerID:   custemerID,
 				Transactions: []Transaction{transaction},
+				Balances: make([]Balance, 12), // of length 12, one for each month
 			}
 			// write lock
 			users.Lock()
@@ -220,6 +221,14 @@ func storeTransactions(transactions *[]Transaction) {
 
 func calculateBalances() {
 	// get transactions for each user
+	for customerID, user := range users.UserMap {
+		for _, transaction := range user.Transactions {
+			// get month and year from date
+			// add transaction amount to balance for that month
+			// if balance is less than min balance, update min balance
+			// if balance is greater than max balance, update max balance
+		}
+
 	// iterate through transactions
 	// for each transaction, check the date
 	// use a map to store the balances for each month
