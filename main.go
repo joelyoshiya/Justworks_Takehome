@@ -112,12 +112,14 @@ func readCSV() *[]Transaction {
 			// fmt.Println("Error: ", err)
 			break
 		}
-		// parse list of strings into transaction
 		// TODO: add error handling for invalid input - consider REGEX for cleaning
-		// parse customerID
 		// if invalid number of arguments, skip to next line
 		if len(line) != 3 {
 			// fmt.Println("Error: Invalid number of arguments.")
+			continue
+		}
+		if line[0] == "" || line[1] == "" || line[2] == "" {
+			// fmt.Println("Error: Invalid input.")
 			continue
 		}
 		customerID := strings.TrimSpace(line[0])
