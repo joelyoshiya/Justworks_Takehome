@@ -9,7 +9,7 @@
 // Output CSV Format:
 // `CustomerID, MM/YYYY, Min Balance, Max Balance, Ending Balance`
 
-// APPRAOCH
+// APPROACH
 // Have a filereader that reads the csv file and parses the data into a list of **transactions**.
 // Customer IDs will be determined by the `CustomerID` column of the input csv file.
 // Then, have a function that takes in a list of transactions and returns a list of **balances**.
@@ -85,6 +85,7 @@ var users = NewUsers()
 
 // FUNCTIONS
 
+// to validate the date format
 func validateDate(date string) bool {
 	date_arr := strings.Split(date, "/")
 	if len(date_arr) != 3 {
@@ -132,10 +133,8 @@ func readCSV(filePath string) *[]Transaction {
 		// if file does not exist, exit program
 		os.Exit(1)
 	}
-	// instantiate list of transactions
-	var transactions []Transaction
 	// initialize list of transactions
-	transactions = make([]Transaction, 0)
+	transactions := make([]Transaction, 0)
 	// initialize a csv reader
 	csvReader := csv.NewReader(file)
 	csvReader.TrimLeadingSpace = true // trim leading spaces
@@ -199,15 +198,13 @@ func storeTransactions(transactions *[]Transaction) {
 		user, ok := users.UserMap[custemerID]
 		users.RUnlock()
 
-		if ok {
-			// if user exists, append transaction to user
+		if ok { // if user exists, append transaction to user
 			user.Transactions = append(user.Transactions, transaction) // update copy of user transactions
 			// write lock
 			users.Lock()
 			users.UserMap[custemerID] = user // update user in local storage
 			users.Unlock()
-		} else {
-			// if user does not exist, create user and append transaction to user
+		} else { // if user does not exist, create user and append transaction to user
 			newUser := User{
 				CustomerID:   custemerID,
 				Transactions: []Transaction{transaction},
