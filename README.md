@@ -28,7 +28,7 @@ Output CSV Format:
 
 Have a filereader that reads the csv file and parses the data into a list of **transactions**. Then, have a function that takes in a list of transactions and returns a list of **balances**. The function will iterate through the list of transactions and calculate the balance for each month, for each user. The function will return a list of balances, pertaining to each month, for each user.
 
-*In the case that we are returning multiple months of balances for each user, we will return the balance items first in order of customer, then in order of month, by ascending order of both `CustomerID` followed by `MM/YYYY`.*
+*In the case that we are returning multiple months of balances for each user, we will return the balance items grouped by customer, and then in order of month, by ascending order of month. We don't guarantee any particular ordering of customers.*
 
 Then, have a function that takes in a list of balances and returns a list of strings that can be written to a csv file. The function will iterate through the list of balances and create a string for each balance. The function will return a list of strings.
 
