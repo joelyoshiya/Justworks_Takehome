@@ -30,8 +30,6 @@ import (
 	"strings"
 )
 
-
-
 // STRUCTS AND TYPES
 // Input csv is mapped to a list of transactions
 // transactions are each tied a user - custemerID is the unique identifier
@@ -131,14 +129,26 @@ func readCSV() *[]Transaction {
 	return &transactions
 }
 
-func storeTransactions(*[]Transaction) {
+func storeTransactions(transactions *[]Transaction) {
 	// takes a pointer to a list of transactions
 	// iterates through list of transactions
 	for _, transaction := range *transactions {
 		// check if user exists in local storage
 		custemerID := transaction.CustomerID
-		
-		
+		if user, ok := users.UserMap[custemerID]; ok {
+			// if user exists, append transaction to user
+			user.Transactions = append(user.Transactions, transaction) // update copy of user transactions
+			users.UserMap[custemerID] = user                           // update user in local storage
+		} else {
+			// if user does not exist, create user and append transaction to user
+			user := User{
+				CustomerID:   custemerID,
+				Transactions: []Transaction{transaction},
+			}
+			users.UserMap[custemerID] = user
+		}
+	}
+
 }
 
 func calculateBalances() {
@@ -150,7 +160,7 @@ func storeBalances() {
 }
 
 func writeCSV() {
-	
+
 }
 
 func main() {
