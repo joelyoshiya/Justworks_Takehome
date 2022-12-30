@@ -68,3 +68,5 @@ Tentatively, I plan to submit a zip file containing the following:
 I also plan to leave a link to the github repo in the notes section of the submission form.
 
 ## References
+
+- [The Go Init Function - TutorialEdge.net](https://tutorialedge.net/golang/the-go-init-function/)

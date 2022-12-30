@@ -1,13 +1,3 @@
-package main
-
-import (
-	"bufio"
-	"fmt"
-	"os"
-	"strconv"
-	"strings"
-)
-
 // Written by: Joel Yoshiya Foster
 // Email: joel.foster@gmail.com
 // Date: 2022-12-29
@@ -29,6 +19,18 @@ import (
 // *In the case that we are returning multiple months of balances for each user, we will return the balance items first in order of customer, then in order of month, by ascending order of both `CustomerID` followed by `MM/YYYY`.*
 // Then, have a function that takes in a list of balances and returns a list of strings that can be written to a csv file. The function will iterate through the list of balances and create a string for each balance. The function will return a list of strings.
 // Finally, have a filewriter that takes in a list of strings and writes them to a csv file. Output the
+
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+)
+
+
 
 // STRUCTS AND TYPES
 // Input csv is mapped to a list of transactions
@@ -70,7 +72,8 @@ type Users struct {
 // However, for the sake of this exercise, we will use a local storage solution.
 // This will be a map of users, where the key is the CustomerID, and the value is the user struct.
 
-// define a constructor for the users struct
+// define a constructor for a pointer to a users struct
+// allows passing of Users struct to other components, if needed down the line - See Referral 1
 func NewUsers() *Users {
 	return &Users{
 		UserMap: make(map[string]User),
@@ -131,9 +134,14 @@ func readCSV() *[]Transaction {
 func storeTransactions(*[]Transaction) {
 	// takes a pointer to a list of transactions
 	// iterates through list of transactions
-	// for each transaction, check if user exists in local storage
-	// if user does not exist, create user and add transaction to user
-	// if user does exist, add transaction to user
+	for _, transaction := range *transactions {
+		// check if user exists in local storage
+		custemerID := transaction.CustomerID
+		
+		
+}
+
+func calculateBalances() {
 
 }
 
@@ -141,8 +149,13 @@ func storeBalances() {
 
 }
 
+func writeCSV() {
+	
+}
+
 func main() {
 
+	// TODO - should I initialize the users struct here?
 	// Read CSV file
 	transactions := readCSV()
 	// print transactions
