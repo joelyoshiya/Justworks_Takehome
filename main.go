@@ -52,19 +52,11 @@ type Balance struct {
 	EndingBalance int
 }
 
-// Define a slice of balances
-type Balances []Balance
-
-// Constructor for Balances struct
-func NewBalances() {
-	make(Balances, 12) // for 12 months
-}
-
 // Define a user struct
 type User struct {
 	CustomerID   string
-	Transactions []Transaction        // each item will be an individual transaction - multiple allowed per day, month, year
-	YearBalances map[string][]Balance // map where key is the year. Each year will hold slice of balance structs for each month
+	Transactions []Transaction       // each item will be an individual transaction - multiple allowed per day, month, year
+	YearBalances map[int][12]Balance // map where key is the year. Each year will hold slice of balance structs for each month
 }
 
 // Define a users struct
@@ -216,7 +208,7 @@ func storeTransactions(transactions *[]Transaction) {
 			newUser := User{
 				CustomerID:   custemerID,
 				Transactions: []Transaction{transaction},
-				YearBalances: make(map[string][]Balance),
+				YearBalances: make(map[int][12]Balance),
 			}
 			// write lock
 			users.Lock()
@@ -232,6 +224,16 @@ func calculateBalances() {
 	for customerID, user := range users.UserMap {
 		for _, transaction := range user.Transactions {
 			// get month and year from date
+			date := transaction.Date
+			date_arr := strings.Split(date, "/")
+			month, err := strconv.Atoi(date_arr[0])
+			year, err := strconv.Atoi(date_arr[2])
+			// check if year exists in user's yearBalances map
+			yearBalances, ok := user.YearBalances[year]
+			if ok { // if year exists, check if month exists in yearBalances
+				monthBalance := yearBalances[month]
+			}
+
 			// add transaction amount to balance for that month
 			// if balance is less than min balance, update min balance
 			// if balance is greater than max balance, update max balance
