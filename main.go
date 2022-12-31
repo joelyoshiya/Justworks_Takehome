@@ -64,25 +64,19 @@ func NewBalance() Balance {
 	}
 }
 
-// Define a balances struct - a fixed size of array for each month pertaining to one year
-type Balances struct {
-	BalanceArray [12]Balance
-}
+// Define a balances struct - map of balances for each month, indexed by month in int format
+type Balances map[int]Balance
 
 // Constructor to set default values for a balances struct
 func NewBalances() Balances {
-	Balances := Balances{}
-	for i := 0; i < 12; i++ {
-		Balances.BalanceArray[i] = NewBalance()
-	}
-	return Balances
+	return make(Balances)
 }
 
 // Define a user struct
 type User struct {
 	CustomerID   string
 	Transactions []Transaction    // each item will be an individual transaction - multiple allowed per day, month, year
-	YearBalances map[int]Balances // map where key is the year. Each year will hold slice of balance structs for each month
+	YearBalances map[int]Balances // map where key is the year. Each year will hold a map of balances for each month
 }
 
 // Define a users struct
@@ -248,8 +242,6 @@ func storeTransactions(transactions *[]Transaction) {
 func calculateBalances() {
 	// get transactions for each user
 	for _, user := range users.UserMap {
-		// acquire write lock
-		users.Lock()
 		for _, transaction := range user.Transactions {
 			// get month and year from date
 			date_arr := strings.Split(transaction.Date, "/")
@@ -263,26 +255,42 @@ func calculateBalances() {
 				continue
 			}
 
+			// acquire write lock
+			users.Lock()
+
 			// check if year exists in user's yearBalances map
-			balances, ok := user.YearBalances[year]
+			_, ok := user.YearBalances[year]
 			if !ok { // if year does not exist, create new year
 				user.YearBalances[year] = NewBalances()
-				balances = user.YearBalances[year]
 			}
-			// get balance for month
-			balance := balances.BalanceArray[month-1] // adjusted for 0-indexing
+			balances := user.YearBalances[year]
+
+			// check if month exists in user's yearBalances map
+			_, ok = balances[month]
+			if !ok { // if month does not exist, create new month
+				balances[month] = NewBalance()
+			}
+			balance := balances[month]
+
+			// update balance
 			balance.EndingBalance += transaction.Amount
-			if balance.EndingBalance < balance.MinBalance {
-				balance.MinBalance = balance.EndingBalance
-			}
+			// check if current balance is max or min balance
 			if balance.EndingBalance > balance.MaxBalance {
 				balance.MaxBalance = balance.EndingBalance
 			}
-			balances.BalanceArray[month-1] = balance // update balance for month
-			continue
+			if balance.EndingBalance < balance.MinBalance {
+				balance.MinBalance = balance.EndingBalance
+			}
+
+			// update user's yearBalances map
+			user.YearBalances[year][month] = balance
+
+			// update user in local storage
+			users.UserMap[user.CustomerID] = user
+
+			// release write lock
+			users.Unlock()
 		}
-		// release write lock
-		users.Unlock()
 	}
 
 }
@@ -309,19 +317,26 @@ func main() {
 	// Store transactions in local storage
 	storeTransactions(transactions)
 
-	// print users and their transactions
-	for customerID, user := range users.UserMap {
-		// print customerID
-		fmt.Printf("CustomerID: %v\n", customerID)
-		// print transactions
-		for _, transaction := range user.Transactions {
-			fmt.Printf("\t%v\n", transaction)
-		}
-	}
-	// print number of users
-	println("Number of users: " + strconv.FormatInt(int64(len(users.UserMap)), 10))
-
 	// Calculate balances for each month, for each user
+	calculateBalances()
+
+	// print balances to stdout
+	for _, user := range users.UserMap {
+		// print customerID
+		fmt.Printf("\nCustomerID: %v\n", user.CustomerID)
+		// print yearBalances
+		for year, balances := range user.YearBalances {
+			fmt.Printf("Year: %v\n", year)
+			for month, balance := range balances {
+				fmt.Printf("Month: %v\n", month)
+				fmt.Printf("Min Balance: %v\n", balance.MinBalance)
+				fmt.Printf("Max Balance: %v\n", balance.MaxBalance)
+				fmt.Printf("Ending Balance: %v\n", balance.EndingBalance)
+
+			}
+		}
+		fmt.Println()
+	}
 
 	// Write list of strings to CSV file
 
