@@ -110,6 +110,20 @@ func NewUsers() *Users {
 
 // FUNCTIONS
 
+func readCSV(filePath string) *csv.Reader {
+	// check if file exists
+	file, err := os.Open(filePath)
+	if err != nil {
+		// if file does not exist, exit program
+		os.Exit(1)
+	}
+	// open csv reader and return the pointer
+	csvReader := csv.NewReader(file)
+	csvReader.FieldsPerRecord = 3 // set number of fields per record
+
+	return csvReader
+}
+
 // to validate the date format
 func validateDate(date string) bool {
 	date_arr := strings.Split(date, "/")
@@ -150,18 +164,28 @@ func validateDate(date string) bool {
 	return true
 }
 
-func readCSV(filePath string) *csv.Reader {
-	// check if file exists
-	file, err := os.Open(filePath)
-	if err != nil {
-		// if file does not exist, exit program
-		os.Exit(1)
+func validateLine(line []string) bool {
+	// check for valid customerID
+	if line[0] == "" {
+		// fmt.Println("Error: Invalid customerID.")
+		return false
 	}
-	// open csv reader and return the pointer
-	csvReader := csv.NewReader(file)
-	csvReader.FieldsPerRecord = 3 // set number of fields per record
-
-	return csvReader
+	// check for valid date
+	if !validateDate(line[1]) {
+		// fmt.Println("Error: Invalid date.")
+		return false
+	}
+	// check for valid amount
+	amount, err := strconv.Atoi(line[2])
+	if err != nil {
+		// fmt.Println("Error: Invalid amount.")
+		return false
+	}
+	if amount < -1000000 || amount > 1000000 {
+		// fmt.Println("Error: Invalid amount.")
+		return false
+	}
+	return true
 }
 
 // opens a file and reads it into a list of transactions
@@ -179,29 +203,20 @@ func processTransactions(csvReader *csv.Reader) *[]Transaction {
 			// fmt.Println("Error: ", err)
 			break
 		}
-		// TODO: add error handling for invalid input - consider REGEX for cleaning
-		// if invalid number of arguments, skip to next line
-		if len(line) != 3 {
-			// fmt.Println("Error: Invalid number of arguments.")
+		// validate line
+		if !validateLine(line) {
+			// fmt.Println("Error: Invalid line.")
 			continue
 		}
-		if line[0] == "" || line[1] == "" || line[2] == "" {
-			// fmt.Println("Error: Invalid input.")
-			continue
-		}
-		customerID := strings.TrimSpace(line[0])
-		// parse date
-		date := strings.TrimSpace(line[1])
-		// check for valid date format
-		if !validateDate(date) {
-			// fmt.Println("Error: Invalid date format.")
-			continue
-		}
-		// parse amount
-		amount, err := strconv.Atoi(strings.TrimSpace(line[2]))
+		// get customerID
+		customerID := line[0]
+		// get date
+		date := line[1]
+		// get amount
+		amount, err := strconv.Atoi(line[2])
 		if err != nil {
-			// if amount is not an integer, log error to stdout
-			fmt.Printf("Error: Amount is not an integer. Error: %v", err)
+			// fmt.Println("Error: Invalid amount.")
+			continue
 		}
 		// create transaction
 		transaction := Transaction{
