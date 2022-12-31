@@ -52,11 +52,14 @@ type Balance struct {
 	EndingBalance int
 }
 
+// Define a balances struct - a fixed size of array for each month
+type Balances [12]Balance
+
 // Define a user struct
 type User struct {
 	CustomerID   string
-	Transactions []Transaction       // each item will be an individual transaction - multiple allowed per day, month, year
-	YearBalances map[int][12]Balance // map where key is the year. Each year will hold slice of balance structs for each month
+	Transactions []Transaction    // each item will be an individual transaction - multiple allowed per day, month, year
+	YearBalances map[int]Balances // map where key is the year. Each year will hold slice of balance structs for each month
 }
 
 // Define a users struct
@@ -208,7 +211,7 @@ func storeTransactions(transactions *[]Transaction) {
 			newUser := User{
 				CustomerID:   custemerID,
 				Transactions: []Transaction{transaction},
-				YearBalances: make(map[int][12]Balance),
+				YearBalances: make(map[int]Balances),
 			}
 			// write lock
 			users.Lock()
