@@ -201,35 +201,26 @@ func readCSV(filePath string) *[]Transaction {
 	return &transactions
 }
 
+// stores transactions in local storage
 func storeTransactions(transactions *[]Transaction) {
-	// takes a pointer to a list of transactions
-	// iterates through list of transactions
 	for _, transaction := range *transactions {
 
-		// check if user exists in local storage
+		// get customerID
 		custemerID := transaction.CustomerID
 
-		// read lock
-		users.RLock()
+		// check if user exists in local storage
 		user, ok := users.UserMap[custemerID]
-		users.RUnlock()
 
 		if ok { // if user exists, append transaction to user
 			user.Transactions = append(user.Transactions, transaction) // update copy of user transactions
-			// write lock
-			users.Lock()
-			users.UserMap[custemerID] = user // update user in local storage
-			users.Unlock()
+			users.UserMap[custemerID] = user                           // update user in local storage
 		} else { // if user does not exist, create user and append transaction to user
 			newUser := User{
 				CustomerID:   custemerID,
 				Transactions: []Transaction{transaction},
 				YearBalances: make(map[int]Balances),
 			}
-			// write lock
-			users.Lock()
 			users.UserMap[custemerID] = newUser // update user in local storage with new user object
-			users.Unlock()
 		}
 	}
 
@@ -250,9 +241,6 @@ func calculateBalances() {
 			if err != nil { // skip to next transaction if error
 				continue
 			}
-
-			// acquire write lock
-			users.Lock()
 
 			// check if year exists in user's yearBalances map
 			_, ok := user.YearBalances[year]
@@ -283,9 +271,6 @@ func calculateBalances() {
 
 			// update user in local storage
 			users.UserMap[user.CustomerID] = user
-
-			// release write lock
-			users.Unlock()
 		}
 	}
 

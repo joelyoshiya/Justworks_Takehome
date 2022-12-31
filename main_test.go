@@ -40,6 +40,7 @@ var expectedBalances = map[string]map[int]map[int]map[string]int{
 	},
 }
 
+// GOLDEN PATH TESTS
 func Test_ReadCSV(t *testing.T) {
 	transactions := readCSV("data_raw_1.csv")
 	if len((*transactions)) != 90 {
@@ -83,3 +84,5 @@ func Test_CalculateBalances(t *testing.T) {
 	}
 
 }
+
+// BAD INPUT TESTS
