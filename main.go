@@ -108,9 +108,6 @@ func NewUsers() *Users {
 	}
 }
 
-// our local storage solution - defined package-wide
-var users = NewUsers()
-
 // FUNCTIONS
 
 // to validate the date format
@@ -153,20 +150,26 @@ func validateDate(date string) bool {
 	return true
 }
 
-// opens a file and reads it into a list of transactions
-func readCSV(filePath string) *[]Transaction {
+func readCSV(filePath string) *csv.Reader {
 	// check if file exists
 	file, err := os.Open(filePath)
 	if err != nil {
 		// if file does not exist, exit program
 		os.Exit(1)
 	}
-	// initialize list of transactions
-	transactions := make([]Transaction, 0)
-	// initialize a csv reader
+	// open csv reader and return the pointer
 	csvReader := csv.NewReader(file)
-	csvReader.TrimLeadingSpace = true // trim leading spaces
-	csvReader.FieldsPerRecord = 3     // set number of fields per record
+	csvReader.FieldsPerRecord = 3 // set number of fields per record
+
+	return csvReader
+}
+
+// opens a file and reads it into a list of transactions
+func processTransactions(csvReader *csv.Reader) *[]Transaction {
+	// create a list of transactions
+	transactions := make([]Transaction, 0)
+	// open csv file
+	// csvReader := readCSV(os.Args[1])
 	// iterate through file
 	for {
 		// read line
@@ -214,7 +217,7 @@ func readCSV(filePath string) *[]Transaction {
 }
 
 // stores transactions in local storage
-func storeTransactions(transactions *[]Transaction) {
+func storeTransactions(users *Users, transactions *[]Transaction) {
 	for _, transaction := range *transactions {
 
 		// get customerID
@@ -238,7 +241,7 @@ func storeTransactions(transactions *[]Transaction) {
 
 }
 
-func storeBalances() {
+func storeBalances(users *Users) {
 	// get transactions for each user
 	for _, user := range users.UserMap {
 		for _, transaction := range user.Transactions {
@@ -291,7 +294,7 @@ func storeBalances() {
 // retrieve balances from local storage, sorted by customerID
 // write balances to CSV file
 // want sorted by customerID, then year, then month
-func writeCSV() {
+func writeCSV(users *Users) {
 	// open file writer
 	file, err := os.Create("balances.csv")
 	if err != nil {
@@ -348,15 +351,20 @@ func writeCSV() {
 func main() {
 
 	// TODO - should I initialize the users struct here?
+	// our local storage solution - defined package-wide
+	var users = NewUsers()
 
 	// Read CSV file
-	transactions := readCSV(os.Args[1])
+	csvReader := readCSV(os.Args[1]) // filepath is first argument
+
+	// Process transactions
+	transactions := processTransactions(csvReader)
 
 	// Store transactions in local storage
-	storeTransactions(transactions)
+	storeTransactions(users, transactions)
 
 	// Calculate and store balances for each month, for each user
-	storeBalances()
+	storeBalances(users)
 
 	// print balances to stdout
 	// for _, user := range users.UserMap {
@@ -377,6 +385,6 @@ func main() {
 	// }
 
 	// Write list of strings to CSV file
-	writeCSV()
+	writeCSV(users)
 
 }

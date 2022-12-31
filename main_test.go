@@ -46,15 +46,16 @@ var expectedBalances = map[string]map[int]map[int]map[string]int{
 
 // GOLDEN PATH TESTS
 func Test_ReadCSV(t *testing.T) {
-	transactions := readCSV("data_raw_1.csv")
+	transactions := processTransactions(readCSV("data_raw_1.csv"))
 	if len((*transactions)) != 90 {
 		t.Errorf("Expected 90 transactions, got %v", len((*transactions)))
 	}
 }
 
 func Test_StoreTransactions(t *testing.T) {
-	transactions := readCSV("data_raw_1.csv")
-	storeTransactions(transactions) // run only once (memory is shared between tests)
+	users := NewUsers()
+	transactions := processTransactions(readCSV("data_raw_1.csv"))
+	storeTransactions(users, transactions) // run only once (memory is shared between tests)
 	if len(users.UserMap) != 3 {
 		t.Errorf("Expected 3 users, got %v", len(users.UserMap))
 	}
@@ -67,7 +68,10 @@ func Test_StoreTransactions(t *testing.T) {
 }
 
 func Test_CalculateBalances(t *testing.T) {
-	storeBalances() // run only once (memory is shared between tests)
+	users := NewUsers()
+	transactions := processTransactions(readCSV("data_raw_1.csv"))
+	storeTransactions(users, transactions)
+	storeBalances(users)
 
 	for customerID, user := range users.UserMap {
 		// iterate through each year of balances
@@ -90,7 +94,11 @@ func Test_CalculateBalances(t *testing.T) {
 }
 
 func Test_WriteCSV(t *testing.T) {
-	writeCSV()
+	users := NewUsers()
+	transactions := processTransactions(readCSV("data_raw_1.csv"))
+	storeTransactions(users, transactions)
+	storeBalances(users)
+	writeCSV(users)
 	var expectedFile = "Output_Data.csv"
 	var actualFile = "balances.csv"
 

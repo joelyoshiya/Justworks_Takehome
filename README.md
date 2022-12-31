@@ -38,7 +38,7 @@ Finally, have a filewriter that takes in a list of strings and writes them to a 
 
 ## Technology
 
-- Go : go1.18.3
+- Go : go1.19.4 darwin/arm64
 - Docker: 20.10.21
 
 ## How to run
