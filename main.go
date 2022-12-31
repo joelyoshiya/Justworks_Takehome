@@ -226,7 +226,7 @@ func storeTransactions(transactions *[]Transaction) {
 
 }
 
-func calculateBalances() {
+func storeBalances() {
 	// get transactions for each user
 	for _, user := range users.UserMap {
 		for _, transaction := range user.Transactions {
@@ -276,12 +276,6 @@ func calculateBalances() {
 
 }
 
-func storeBalances() {
-	// run calculateBalances()
-	// store balances in local storage
-
-}
-
 func writeCSV() {
 	// retrieve balances from local storage, sorted by customerID
 	// write balances to CSV file
@@ -298,8 +292,8 @@ func main() {
 	// Store transactions in local storage
 	storeTransactions(transactions)
 
-	// Calculate balances for each month, for each user
-	calculateBalances()
+	// Calculate and store balances for each month, for each user
+	storeBalances()
 
 	// print balances to stdout
 	for _, user := range users.UserMap {

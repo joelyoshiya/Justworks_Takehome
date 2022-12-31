@@ -63,7 +63,7 @@ func Test_StoreTransactions(t *testing.T) {
 }
 
 func Test_CalculateBalances(t *testing.T) {
-	calculateBalances() // run only once (memory is shared between tests)
+	storeBalances() // run only once (memory is shared between tests)
 
 	for customerID, user := range users.UserMap {
 		// iterate through each year of balances
