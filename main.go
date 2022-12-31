@@ -25,8 +25,10 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
+	"log"
 	"math"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -75,11 +77,21 @@ type User struct {
 	YearBalances map[int]Balances // map where key is the year. Each year will hold a map of balances for each month
 }
 
-// Define a users struct
+// Define a users struct - map of users, indexed by customerID
 
 type Users struct {
 	sync.RWMutex // for thread-safe access to the map
 	UserMap      map[string]User
+}
+
+// Define an output struct
+type Output struct {
+	CustomerID    string
+	Month         int
+	Year          int
+	MinBalance    int
+	MaxBalance    int
+	EndingBalance int
 }
 
 // Define a local storage for users
@@ -276,10 +288,61 @@ func storeBalances() {
 
 }
 
+// retrieve balances from local storage, sorted by customerID
+// write balances to CSV file
+// want sorted by customerID, then year, then month
 func writeCSV() {
-	// retrieve balances from local storage, sorted by customerID
-	// write balances to CSV file
+	// open file writer
+	file, err := os.Create("balances.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	// grab userIDs from local storage, then sort userIDs
+	sortedCustomerIDs := make([]string, 0)
+	for customerID, _ := range users.UserMap {
+		sortedCustomerIDs = append(sortedCustomerIDs, customerID)
+	}
+	sort.Strings(sortedCustomerIDs)
+
+	// iterate through sorted userIDs
+	for _, customerID := range sortedCustomerIDs {
+
+		// get user from local storage
+		user := users.UserMap[customerID]
+
+		// grab years from user's yearBalances map, then sort years
+		sortedYears := make([]int, 0)
+		for year, _ := range user.YearBalances {
+			sortedYears = append(sortedYears, year)
+		}
+		sort.Ints(sortedYears)
+
+		// iterate through sorted years
+		for _, year := range sortedYears {
+
+			// grab months from user's yearBalances map, then sort months
+			sortedMonths := make([]int, 0)
+			for month, _ := range user.YearBalances[year] {
+				sortedMonths = append(sortedMonths, month)
+			}
+			sort.Ints(sortedMonths)
+
+			// iterate through sorted months
+			for _, month := range sortedMonths {
+
+				// get balance from user's yearBalances map
+				balance := user.YearBalances[year][month]
+
+				// write to file
+				_, err := file.WriteString(fmt.Sprintf("%v,%v/%v,%v,%v,%v\n", customerID, month, year, balance.MinBalance, balance.MaxBalance, balance.EndingBalance))
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+		}
+	}
+	defer file.Close()
 }
 
 func main() {
@@ -296,23 +359,24 @@ func main() {
 	storeBalances()
 
 	// print balances to stdout
-	for _, user := range users.UserMap {
-		// print customerID
-		fmt.Printf("\nCustomerID: %v\n", user.CustomerID)
-		// print yearBalances
-		for year, balances := range user.YearBalances {
-			fmt.Printf("Year: %v\n", year)
-			for month, balance := range balances {
-				fmt.Printf("Month: %v\n", month)
-				fmt.Printf("Min Balance: %v\n", balance.MinBalance)
-				fmt.Printf("Max Balance: %v\n", balance.MaxBalance)
-				fmt.Printf("Ending Balance: %v\n", balance.EndingBalance)
+	// for _, user := range users.UserMap {
+	// 	// print customerID
+	// 	fmt.Printf("\nCustomerID: %v\n", user.CustomerID)
+	// 	// print yearBalances
+	// 	for year, balances := range user.YearBalances {
+	// 		fmt.Printf("Year: %v\n", year)
+	// 		for month, balance := range balances {
+	// 			fmt.Printf("Month: %v\n", month)
+	// 			fmt.Printf("Min Balance: %v\n", balance.MinBalance)
+	// 			fmt.Printf("Max Balance: %v\n", balance.MaxBalance)
+	// 			fmt.Printf("Ending Balance: %v\n", balance.EndingBalance)
 
-			}
-		}
-		fmt.Println()
-	}
+	// 		}
+	// 	}
+	// 	fmt.Println()
+	// }
 
 	// Write list of strings to CSV file
+	writeCSV()
 
 }

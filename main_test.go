@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"bytes"
+	"io/ioutil"
+	"testing"
+)
 
 // note: each test is run in a separate goroutine, and memory is shared between tests
 
@@ -81,6 +85,26 @@ func Test_CalculateBalances(t *testing.T) {
 				}
 			}
 		}
+	}
+
+}
+
+func Test_WriteCSV(t *testing.T) {
+	writeCSV()
+	var expectedFile = "Output_Data.csv"
+	var actualFile = "balances.csv"
+
+	// check that file contents are identical
+	expected, err := ioutil.ReadFile(expectedFile)
+	if err != nil {
+		t.Errorf("Error reading expected file: %v", err)
+	}
+	actual, err := ioutil.ReadFile(actualFile)
+	if err != nil {
+		t.Errorf("Error reading actual file: %v", err)
+	}
+	if !bytes.Equal(expected, actual) {
+		t.Errorf("Expected file contents to be identical, got %v", string(actual))
 	}
 
 }
