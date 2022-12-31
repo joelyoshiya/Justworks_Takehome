@@ -362,12 +362,11 @@ func writeCSV(file *os.File, users *Users) {
 }
 
 func main() {
-
 	// Create local storage
 	var users = NewUsers()
 
 	// Read CSV file
-	csvReader := readCSV(os.Args[1]) // filepath is first argument
+	csvReader := readCSV("input/" + os.Args[1]) // input filepath is first argument
 
 	// Process transactions
 	transactions := processTransactions(csvReader)
@@ -379,7 +378,7 @@ func main() {
 	storeBalances(users)
 
 	// Create CSV file
-	file := createCSV(os.Args[2])
+	file := createCSV("output/" + os.Args[2]) // output filepath is second argument
 
 	// Write list of strings to CSV file
 	writeCSV(file, users)
