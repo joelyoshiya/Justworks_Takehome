@@ -46,8 +46,6 @@ type Transaction struct {
 
 // Define a balance struct
 type Balance struct {
-	CustomerID    string
-	Month         int
 	MinBalance    int
 	MaxBalance    int
 	EndingBalance int
@@ -56,8 +54,6 @@ type Balance struct {
 // Constructor to set default values for a balance struct
 func NewBalance() Balance {
 	return Balance{
-		CustomerID:    "",
-		Month:         0,              // set to 0
 		MinBalance:    math.MaxInt64,  // set to max int64 value
 		MaxBalance:    -math.MaxInt64, // set to min int64 value
 		EndingBalance: 0,
