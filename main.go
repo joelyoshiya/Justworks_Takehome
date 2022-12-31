@@ -350,8 +350,7 @@ func writeCSV(users *Users) {
 
 func main() {
 
-	// TODO - should I initialize the users struct here?
-	// our local storage solution - defined package-wide
+	// Create local storage
 	var users = NewUsers()
 
 	// Read CSV file
@@ -365,24 +364,6 @@ func main() {
 
 	// Calculate and store balances for each month, for each user
 	storeBalances(users)
-
-	// print balances to stdout
-	// for _, user := range users.UserMap {
-	// 	// print customerID
-	// 	fmt.Printf("\nCustomerID: %v\n", user.CustomerID)
-	// 	// print yearBalances
-	// 	for year, balances := range user.YearBalances {
-	// 		fmt.Printf("Year: %v\n", year)
-	// 		for month, balance := range balances {
-	// 			fmt.Printf("Month: %v\n", month)
-	// 			fmt.Printf("Min Balance: %v\n", balance.MinBalance)
-	// 			fmt.Printf("Max Balance: %v\n", balance.MaxBalance)
-	// 			fmt.Printf("Ending Balance: %v\n", balance.EndingBalance)
-
-	// 		}
-	// 	}
-	// 	fmt.Println()
-	// }
 
 	// Write list of strings to CSV file
 	writeCSV(users)
