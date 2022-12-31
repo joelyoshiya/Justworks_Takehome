@@ -25,6 +25,7 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -46,14 +47,36 @@ type Transaction struct {
 // Define a balance struct
 type Balance struct {
 	CustomerID    string
-	Month         string
+	Month         int
 	MinBalance    int
 	MaxBalance    int
 	EndingBalance int
 }
 
-// Define a balances struct - a fixed size of array for each month
-type Balances [12]Balance
+// Constructor to set default values for a balance struct
+func NewBalance() Balance {
+	return Balance{
+		CustomerID:    "",
+		Month:         0,              // set to 0
+		MinBalance:    math.MaxInt64,  // set to max int64 value
+		MaxBalance:    -math.MaxInt64, // set to min int64 value
+		EndingBalance: 0,
+	}
+}
+
+// Define a balances struct - a fixed size of array for each month pertaining to one year
+type Balances struct {
+	BalanceArray [12]Balance
+}
+
+// Constructor to set default values for a balances struct
+func NewBalances() Balances {
+	Balances := Balances{}
+	for i := 0; i < 12; i++ {
+		Balances.BalanceArray[i] = NewBalance()
+	}
+	return Balances
+}
 
 // Define a user struct
 type User struct {
@@ -224,29 +247,42 @@ func storeTransactions(transactions *[]Transaction) {
 
 func calculateBalances() {
 	// get transactions for each user
-	for customerID, user := range users.UserMap {
+	for _, user := range users.UserMap {
+		// acquire write lock
+		users.Lock()
 		for _, transaction := range user.Transactions {
 			// get month and year from date
-			date := transaction.Date
-			date_arr := strings.Split(date, "/")
+			date_arr := strings.Split(transaction.Date, "/")
 			month, err := strconv.Atoi(date_arr[0])
+
+			if err != nil { // skip to next transaction if error
+				continue
+			}
 			year, err := strconv.Atoi(date_arr[2])
-			// check if year exists in user's yearBalances map
-			yearBalances, ok := user.YearBalances[year]
-			if ok { // if year exists, check if month exists in yearBalances
-				monthBalance := yearBalances[month]
+			if err != nil { // skip to next transaction if error
+				continue
 			}
 
-			// add transaction amount to balance for that month
-			// if balance is less than min balance, update min balance
-			// if balance is greater than max balance, update max balance
+			// check if year exists in user's yearBalances map
+			balances, ok := user.YearBalances[year]
+			if !ok { // if year does not exist, create new year
+				user.YearBalances[year] = NewBalances()
+				balances = user.YearBalances[year]
+			}
+			// get balance for month
+			balance := balances.BalanceArray[month-1] // adjusted for 0-indexing
+			balance.EndingBalance += transaction.Amount
+			if balance.EndingBalance < balance.MinBalance {
+				balance.MinBalance = balance.EndingBalance
+			}
+			if balance.EndingBalance > balance.MaxBalance {
+				balance.MaxBalance = balance.EndingBalance
+			}
+			balances.BalanceArray[month-1] = balance // update balance for month
 			continue
 		}
-
-		// iterate through transactions
-		// for each transaction, check the date
-		// use a map to store the balances for each month
-		// keep track of the min and max balances as updates are made
+		// release write lock
+		users.Unlock()
 	}
 
 }
