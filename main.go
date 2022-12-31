@@ -192,9 +192,6 @@ func validateLine(line []string) bool {
 func processTransactions(csvReader *csv.Reader) *[]Transaction {
 	// create a list of transactions
 	transactions := make([]Transaction, 0)
-	// open csv file
-	// csvReader := readCSV(os.Args[1])
-	// iterate through file
 	for {
 		// read line
 		line, err := csvReader.Read()
@@ -208,10 +205,8 @@ func processTransactions(csvReader *csv.Reader) *[]Transaction {
 			// fmt.Println("Error: Invalid line.")
 			continue
 		}
-		// get customerID
-		customerID := line[0]
-		// get date
-		date := line[1]
+		// get customerID, date
+		customerID, date := line[0], line[1]
 		// get amount
 		amount, err := strconv.Atoi(line[2])
 		if err != nil {
@@ -262,8 +257,8 @@ func storeBalances(users *Users) {
 		for _, transaction := range user.Transactions {
 			// get month and year from date
 			date_arr := strings.Split(transaction.Date, "/")
-			month, err := strconv.Atoi(date_arr[0])
 
+			month, err := strconv.Atoi(date_arr[0])
 			if err != nil { // skip to next transaction if error
 				continue
 			}
@@ -306,16 +301,19 @@ func storeBalances(users *Users) {
 
 }
 
-// retrieve balances from local storage, sorted by customerID
-// write balances to CSV file
-// want sorted by customerID, then year, then month
-func writeCSV(users *Users) {
+func createCSV(fileName string) *os.File {
 	// open file writer
-	file, err := os.Create("balances.csv")
+	file, err := os.Create(fileName)
 	if err != nil {
 		log.Fatal(err)
 	}
+	return file
+}
 
+// retrieve balances from local storage, sorted by customerID
+// write balances to CSV file
+// want sorted by customerID, then year, then month
+func writeCSV(file *os.File, users *Users) {
 	// grab userIDs from local storage, then sort userIDs
 	sortedCustomerIDs := make([]string, 0)
 	for customerID, _ := range users.UserMap {
@@ -380,7 +378,10 @@ func main() {
 	// Calculate and store balances for each month, for each user
 	storeBalances(users)
 
+	// Create CSV file
+	file := createCSV(os.Args[2])
+
 	// Write list of strings to CSV file
-	writeCSV(users)
+	writeCSV(file, users)
 
 }
