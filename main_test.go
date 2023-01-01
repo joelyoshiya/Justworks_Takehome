@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -112,11 +111,11 @@ func Test_WriteCSV(t *testing.T) {
 	writeCSV(actualFile, users)
 
 	// check that file contents are identical
-	expected, err := ioutil.ReadFile(expectedFilePath)
+	expected, err := os.ReadFile(expectedFilePath)
 	if err != nil {
 		t.Errorf("Error reading expected file: %v", err)
 	}
-	actual, err := ioutil.ReadFile(actualFilePath)
+	actual, err := os.ReadFile(actualFilePath)
 	if err != nil {
 		t.Errorf("Error reading actual file: %v", err)
 	}

@@ -316,7 +316,7 @@ func createCSV(fileName string) *os.File {
 func writeCSV(file *os.File, users *Users) {
 	// grab userIDs from local storage, then sort userIDs
 	sortedCustomerIDs := make([]string, 0)
-	for customerID, _ := range users.UserMap {
+	for customerID := range users.UserMap {
 		sortedCustomerIDs = append(sortedCustomerIDs, customerID)
 	}
 	sort.Strings(sortedCustomerIDs)
@@ -329,7 +329,7 @@ func writeCSV(file *os.File, users *Users) {
 
 		// grab years from user's yearBalances map, then sort years
 		sortedYears := make([]int, 0)
-		for year, _ := range user.YearBalances {
+		for year := range user.YearBalances {
 			sortedYears = append(sortedYears, year)
 		}
 		sort.Ints(sortedYears)
@@ -339,7 +339,7 @@ func writeCSV(file *os.File, users *Users) {
 
 			// grab months from user's yearBalances map, then sort months
 			sortedMonths := make([]int, 0)
-			for month, _ := range user.YearBalances[year] {
+			for month := range user.YearBalances[year] {
 				sortedMonths = append(sortedMonths, month)
 			}
 			sort.Ints(sortedMonths)
