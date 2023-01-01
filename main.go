@@ -20,6 +20,12 @@
 // Then, have a function that takes in a list of balances and returns a list of strings that can be written to a csv file. The function will iterate through the list of balances and create a string for each balance. The function will return a list of strings.
 // Finally, have a filewriter that takes in a list of strings and writes them to a csv file. Output the
 
+// TODO
+// Reconsider separation of transactions and balance logic
+// We want to imitate a live scenario -> as soon as we have a transaction, we want to calculate the balance for that month
+// As new transactions role in for that monthh -> we want to update the balance for that month
+// After all transactions have been processed for that month -> we will output balances for each month for which there is at least one transaction
+
 package main
 
 import (
