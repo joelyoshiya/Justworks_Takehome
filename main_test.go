@@ -3,8 +3,12 @@ package main
 import (
 	"bytes"
 	"io/ioutil"
+	"os"
 	"testing"
 )
+
+// static data for testing
+var inputFilePath = "input/data_raw_1.csv"
 
 // note: each test is run in a separate goroutine, and memory is shared between tests
 
@@ -46,7 +50,7 @@ var expectedBalances = map[string]map[int]map[int]map[string]int{
 
 // GOLDEN PATH TESTS
 func Test_ReadCSV(t *testing.T) {
-	transactions := processTransactions(readCSV("data_raw_1.csv"))
+	transactions := processTransactions(readCSV("input/data_raw_1.csv"))
 	if len((*transactions)) != 90 {
 		t.Errorf("Expected 90 transactions, got %v", len((*transactions)))
 	}
@@ -54,7 +58,7 @@ func Test_ReadCSV(t *testing.T) {
 
 func Test_StoreTransactions(t *testing.T) {
 	users := NewUsers()
-	transactions := processTransactions(readCSV("data_raw_1.csv"))
+	transactions := processTransactions(readCSV(inputFilePath))
 	storeTransactions(users, transactions) // run only once (memory is shared between tests)
 	if len(users.UserMap) != 3 {
 		t.Errorf("Expected 3 users, got %v", len(users.UserMap))
@@ -69,7 +73,7 @@ func Test_StoreTransactions(t *testing.T) {
 
 func Test_CalculateBalances(t *testing.T) {
 	users := NewUsers()
-	transactions := processTransactions(readCSV("data_raw_1.csv"))
+	transactions := processTransactions(readCSV(inputFilePath))
 	storeTransactions(users, transactions)
 	storeBalances(users)
 
@@ -95,25 +99,33 @@ func Test_CalculateBalances(t *testing.T) {
 
 func Test_WriteCSV(t *testing.T) {
 	users := NewUsers()
-	transactions := processTransactions(readCSV("data_raw_1.csv"))
+	transactions := processTransactions(readCSV(inputFilePath))
 	storeTransactions(users, transactions)
 	storeBalances(users)
-	writeCSV(users)
-	var expectedFile = "Output_Data.csv"
-	var actualFile = "balances.csv"
+
+	// file names
+	var expectedFilePath = "output/Output_Data_Expected.csv"
+	var actualFilePath = "output/test.csv"
+
+	// write to test file
+	actualFile := createCSV(actualFilePath)
+	writeCSV(actualFile, users)
 
 	// check that file contents are identical
-	expected, err := ioutil.ReadFile(expectedFile)
+	expected, err := ioutil.ReadFile(expectedFilePath)
 	if err != nil {
 		t.Errorf("Error reading expected file: %v", err)
 	}
-	actual, err := ioutil.ReadFile(actualFile)
+	actual, err := ioutil.ReadFile(actualFilePath)
 	if err != nil {
 		t.Errorf("Error reading actual file: %v", err)
 	}
 	if !bytes.Equal(expected, actual) {
 		t.Errorf("Expected file contents to be identical, got %v", string(actual))
 	}
+
+	// delete test file
+	os.Remove(actualFilePath)
 
 }
 
