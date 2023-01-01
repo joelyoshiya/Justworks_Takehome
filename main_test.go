@@ -7,7 +7,8 @@ import (
 )
 
 // static data for testing
-var inputFilePath = "input/data_raw_1.csv"
+var inputFilePath = "testdata/input.csv"        // holds expected input
+var expectedOutFilePath = "testdata/output.csv" // holds expected output
 
 // note: each test is run in a separate goroutine, and memory is shared between tests
 
@@ -49,7 +50,7 @@ var expectedBalances = map[string]map[int]map[int]map[string]int{
 
 // GOLDEN PATH TESTS
 func Test_ReadCSV(t *testing.T) {
-	transactions := processTransactions(readCSV("input/data_raw_1.csv"))
+	transactions := processTransactions(readCSV(inputFilePath))
 	if len((*transactions)) != 90 {
 		t.Errorf("Expected 90 transactions, got %v", len((*transactions)))
 	}
@@ -102,16 +103,15 @@ func Test_WriteCSV(t *testing.T) {
 	storeTransactions(users, transactions)
 	storeBalances(users)
 
-	// file names
-	var expectedFilePath = "output/Output_Data_Expected.csv"
-	var actualFilePath = "output/test.csv"
+	// file name
+	var actualFilePath = "testdata/output_test.csv"
 
 	// write to test file
 	actualFile := createCSV(actualFilePath)
 	writeCSV(actualFile, users)
 
 	// check that file contents are identical
-	expected, err := os.ReadFile(expectedFilePath)
+	expected, err := os.ReadFile(expectedOutFilePath)
 	if err != nil {
 		t.Errorf("Error reading expected file: %v", err)
 	}
