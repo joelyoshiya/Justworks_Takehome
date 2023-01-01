@@ -226,7 +226,7 @@ func processTransactions(csvReader *csv.Reader) *[]Transaction {
 	return &transactions
 }
 
-// stores transactions in local storage
+// stores transactions with the pertinent user
 func storeTransactions(users *Users, transactions *[]Transaction) {
 	for _, transaction := range *transactions {
 
@@ -254,6 +254,7 @@ func storeTransactions(users *Users, transactions *[]Transaction) {
 func storeBalances(users *Users) {
 	// get transactions for each user
 	for _, user := range users.UserMap {
+		// TODO - sort transactions by date before calculating balances
 		for _, transaction := range user.Transactions {
 			// get month and year from date
 			date_arr := strings.Split(transaction.Date, "/")
