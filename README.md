@@ -26,9 +26,14 @@ Output CSV Format:
 
 ## Assumptions
 
+- Credits applied before debits for any given day (confirmed in FAQ)
 - Maximum and Minimum balances are calculated based on the most recent balance as it pertains to one transaction. This is instead of the max/min being calculated based on the ending balance on a given day.
   - Confirmed via line 99 in FAQ
-
+- No need to check for parsible yet invalid dates, such as 2021-02-31
+  - Confirmed via line 136 in FAQ
+- No need to check for exceeding amount, as long as representable as an integer (int64)
+- EndingBalance relates to the balance at the end of the month, not the balance at the end of the day
+  - in other words, balance starting from 0 after all debits and credits have been applied for the month
 
 ## Approach
 
@@ -42,6 +47,18 @@ Finally, have a filewriter that takes in a list of strings and writes them to a 
 
 ### Handling edge cases
 
+I've used the following approach to handle edge cases:
+
+- clean up the input data
+  - remove any empty lines
+  - remove any lines that don't have 3 columns
+  - remove any lines that have invalid dates
+  - remove any lines that have invalid amounts
+- handle any invalid data
+  - if there are no valid lines, return an empty list of balances
+  - if there are no valid lines, return an empty list of strings
+  - if there are no valid lines, return an empty file
+
 ## Technology
 
 - Go : go1.19.4 darwin/arm64
@@ -49,25 +66,39 @@ Finally, have a filewriter that takes in a list of strings and writes them to a 
 
 ## How to run
 
-blah
+If you have the specified version of Go installed, you can run the program locally. Otherwise, you can run the program in a docker container.
+
+### Locally
+
+1. Clone the repo
+2. Insert your input csv file into the `input` folder
+3. Run `go run main.go [input_file_name] [output_file_name]` in the root directory of the project.
+4. The output file will be in the `output` folder
+
+### Docker
+
+1. Clone the repo
+2. Insert your input csv file into the `input` folder
+3. Run `docker build -t justworks .` in the root directory of the project.
+4. Run `docker run -it justworks [input_file_name] [output_file_name]` in the root directory of the project.
+5. The output file will be in the `output` folder
 
 ## How to test
 
-blah
+Run `go test` in the root directory of the project.
 
 ## Discussion
 
-// TODO
-// Reconsider separation of transactions and balance logic
-// We want to imitate a live scenario -> as soon as we have a transaction, we want to calculate the balance for that month
-// As new transactions role in for that monthh -> we want to update the balance for that month
-// After all transactions have been processed for that month -> we will output balances for each month for which there is at least one transaction
-// First step to doing this: make operations atomic
+If I had time, here are the refactors I would do:
 
-// TODO consider using a Time.time object for the date field
+- Make transaction/balance processing per transaction/day instead of all at once from input
+  - Make the code more modular
+- Imitate a live scenario where new transactions instantly update balance live
+- Use a Time.time object for the date field
+
 ## Conclusion
 
-blah.
+I enjoyed the exercise and how it challenged me to consider edge cases, and how to design objects and methods in an intuitive way.
 
 ## Submission
 
@@ -77,7 +108,9 @@ Tentatively, I plan to submit a zip file containing the following:
 - `go.mod` - the go module file
 - `main.go` - the main program
 - `main_test.go` - the test file
-- `testdata` - a folder containing the test data
+- `input` - a folder containing the input csv file
+- `output` - a folder containing the output csv file
+- `testdata` - a folder containing the test data (used in `main_test.go`)
   - `testdata/input.csv` - the input csv file
   - `testdata/output.csv` - the output csv file
 
@@ -86,3 +119,4 @@ I also plan to leave a link to the github repo in the notes section of the submi
 ## References
 
 - [The Go Init Function - TutorialEdge.net](https://tutorialedge.net/golang/the-go-init-function/)
+- Go stdlib documentation
