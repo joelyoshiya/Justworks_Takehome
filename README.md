@@ -37,11 +37,19 @@ Output CSV Format:
 
 ## Approach
 
-Have a filereader that reads the csv file and parses the data into a list of **transactions**. Then, have a function that takes in a list of transactions and returns a list of **balances**. The function will iterate through the list of transactions and calculate the balance for each month, for each user. The function will return a list of balances, pertaining to each month, for each user.
+### Transactions
 
-*In the case that we are returning multiple months of balances for each user, we will return the balance items grouped by customer, and then in order of month, by ascending order of month. We don't guarantee any particular ordering of customers.*
+Have a filereader that reads the csv file and parses the data into a list of **transactions**. Then, have a function that takes in a list of transactions, maps them to users, and stores those transactions with the pertinent user.
 
-Then, have a function that takes in a list of balances and returns a list of strings that can be written to a csv file. The function will iterate through the list of balances and create a string for each balance. The function will return a list of strings.
+### Balances
+
+A balance processing function will sort user transactions first by date, then apply credits before debits. It will calculate the running balance through the month for each user, updating balance metrics when necessary. The function will store balance metrics to a user object, hashable by year and month. Only data for which there is transactions will be stored (i.e. if a user has no transactions in a given month, no balance data will be stored for that month).
+
+### Output
+
+*In the case that we are returning multiple months of balances for each user, we will return the balance items grouped by customer, and then in order of month, by ascending order of month. Ordering of customers is via alphabetical precedence.*
+
+An output function will apply sorting on multiple layers: customerID, Year, and then Month for the balance items. Then, it will format the balance items into a CSV format, and write to the file all existing balance items for all users.
 
 Finally, have a filewriter that takes in a list of strings and writes them to a csv file. Output the file.
 
@@ -72,8 +80,9 @@ If you have the specified version of Go installed, you can run the program local
 
 1. Clone the repo
 2. Insert your input csv file into the `input` folder
-3. Run `go run main.go [input_file_name] [output_file_name]` in the root directory of the project.
-4. The output file will be in the `output` folder, and file contents read to the console
+3. Build the executable by running `go build -o script` in the root directory of the project.
+4. Run `./script [input_file_name] [output_file_name]` in the root directory of the project.
+5. The output file will be in the `output` folder, and file contents read to the console
 
 ### Docker
 

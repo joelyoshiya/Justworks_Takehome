@@ -18,7 +18,7 @@
 // The function will return a list of balances, pertaining to each month, for each user.
 // *In the case that we are returning multiple months of balances for each user, we will return the balance items first in order of customer, then in order of month, by ascending order of both `CustomerID` followed by `MM/YYYY`.*
 // Then, have a function that takes in a list of balances and returns a list of strings that can be written to a csv file. The function will iterate through the list of balances and create a string for each balance. The function will return a list of strings.
-// Finally, have a filewriter that takes in a list of strings and writes them to a csv file. Output the
+// Finally, have a filewriter that takes in a list of strings and writes them to a csv file. Output the csv file to the output directory. Write contents to stdout.
 
 package main
 
@@ -100,8 +100,9 @@ type Output struct {
 }
 
 // Define a local storage for users
+
 // In a production environment, this would most likely be a persistent storage solution, such as a relational database.
-// Since we are dealing with transactions, my choice would be a relational database, such as MySQL or PostgreSQL.
+// Since we are dealing with transactions, my choice would be an ACID compliant relational database, such as MySQL or PostgreSQL.
 // However, for the sake of this exercise, we will use a local storage solution.
 // This will be a map of users, where the key is the CustomerID, and the value is the user struct.
 
@@ -261,15 +262,6 @@ func storeTransactions(users *Users, transactions *[]Transaction) {
 
 }
 
-// Transactions could be in any order of user/date/amount
-// Balances should only be calculated once per given day, not per transaction
-
-// TODO - account for situation where there are multiple transactions on the same day
-// Sort transactions by date before calculating balances
-// Then sort by positivity - apply credits befored debits for that day
-// One all transactions for a day are applied, calculate the ending balance
-// Then, check if the ending balance qualifies as a min/max balance for all days in the month
-
 // calculates and stores balances based on transactions for a single user
 func storeBalances(users *Users) {
 	// get transactions for each user
@@ -339,51 +331,40 @@ func createCSV(fileName string) *os.File {
 	return file
 }
 
-// retrieves balances from local storage, sorted by customerID
-// writes balances to CSV file sorted by customerID, then year, then month
+// retrieves balances from local storage, binds to Output struct, and writes to CSV file
 func writeCSV(file *os.File, users *Users) {
-	// grab userIDs from local storage, then sort userIDs
-	sortedCustomerIDs := make([]string, 0)
-	for customerID := range users.UserMap {
-		sortedCustomerIDs = append(sortedCustomerIDs, customerID)
-	}
-	sort.Strings(sortedCustomerIDs)
-
-	// iterate through sorted userIDs
-	for _, customerID := range sortedCustomerIDs {
-
-		// get user from local storage
-		user := users.UserMap[customerID]
-
-		// grab years from user's yearBalances map, then sort years
-		sortedYears := make([]int, 0)
-		for year := range user.YearBalances {
-			sortedYears = append(sortedYears, year)
-		}
-		sort.Ints(sortedYears)
-
-		// iterate through sorted years
-		for _, year := range sortedYears {
-
-			// grab months from user's yearBalances map, then sort months
-			sortedMonths := make([]int, 0)
-			for month := range user.YearBalances[year] {
-				sortedMonths = append(sortedMonths, month)
-			}
-			sort.Ints(sortedMonths)
-
-			// iterate through sorted months
-			for _, month := range sortedMonths {
-
-				// get balance from user's yearBalances map
-				balance := user.YearBalances[year][month]
-
-				// write to file
-				_, err := file.WriteString(fmt.Sprintf("%v,%v/%v,%v,%v,%v\n", customerID, month, year, balance.MinBalance, balance.MaxBalance, balance.EndingBalance))
-				if err != nil {
-					log.Fatal(err)
+	outputs := make([]Output, 0)
+	// grab all balance data for each user, map fields to an Output struct
+	for _, user := range users.UserMap {
+		for year, balances := range user.YearBalances {
+			for month, balance := range balances {
+				output := Output{
+					CustomerID:    user.CustomerID,
+					Year:          year,
+					Month:         month,
+					MinBalance:    balance.MinBalance,
+					MaxBalance:    balance.MaxBalance,
+					EndingBalance: balance.EndingBalance,
 				}
+				outputs = append(outputs, output)
 			}
+		}
+	}
+	// sorting based on customerID, then Year, and then Month, sort Output structs
+	sort.Slice(outputs, func(i, j int) bool {
+		if outputs[i].CustomerID == outputs[j].CustomerID {
+			if outputs[i].Year == outputs[j].Year {
+				return outputs[i].Month < outputs[j].Month
+			}
+			return outputs[i].Year < outputs[j].Year
+		}
+		return outputs[i].CustomerID < outputs[j].CustomerID
+	})
+	// write sorted Output structs to file
+	for _, output := range outputs {
+		_, err := file.WriteString(fmt.Sprintf("%v,%v/%v,%v,%v,%v\n", output.CustomerID, output.Month, output.Year, output.MinBalance, output.MaxBalance, output.EndingBalance))
+		if err != nil {
+			log.Fatal(err)
 		}
 	}
 	defer file.Close()
