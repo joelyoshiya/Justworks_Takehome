@@ -49,6 +49,16 @@ blah
 
 blah
 
+## Discussion
+
+// TODO
+// Reconsider separation of transactions and balance logic
+// We want to imitate a live scenario -> as soon as we have a transaction, we want to calculate the balance for that month
+// As new transactions role in for that monthh -> we want to update the balance for that month
+// After all transactions have been processed for that month -> we will output balances for each month for which there is at least one transaction
+// First step to doing this: make operations atomic
+
+// TODO consider using a Time.time object for the date field
 ## Conclusion
 
 blah.
