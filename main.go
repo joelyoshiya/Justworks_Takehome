@@ -177,16 +177,8 @@ func validateLine(line []string) bool {
 		return false
 	}
 	// check for valid amount
-	amount, err := strconv.Atoi(line[2])
-	if err != nil {
-		// fmt.Println("Error: Invalid amount.")
-		return false
-	}
-	if amount < -1000000 || amount > 1000000 {
-		// fmt.Println("Error: Invalid amount.")
-		return false
-	}
-	return true
+	_, err := strconv.Atoi(line[2])
+	return err == nil
 }
 
 // to clean the line for whitespace

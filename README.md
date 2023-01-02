@@ -24,6 +24,12 @@ Input CSV Format:
 Output CSV Format:
 `CustomerID, MM/YYYY, Min Balance, Max Balance, Ending Balance`
 
+## Assumptions
+
+- Maximum and Minimum balances are calculated based on the most recent balance as it pertains to one transaction. This is instead of the max/min being calculated based on the ending balance on a given day.
+  - Confirmed via line 99 in FAQ
+
+
 ## Approach
 
 Have a filereader that reads the csv file and parses the data into a list of **transactions**. Then, have a function that takes in a list of transactions and returns a list of **balances**. The function will iterate through the list of transactions and calculate the balance for each month, for each user. The function will return a list of balances, pertaining to each month, for each user.
