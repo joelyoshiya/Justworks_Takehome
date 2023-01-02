@@ -13,6 +13,7 @@ var inputFileMonthMisordered = "testdata/input_month_misordered.csv" // holds in
 var inputFileEmptyLines = "testdata/input_empty_lines.csv"           // holds input with empty lines
 var inputFileBadDate = "testdata/input_bad_date.csv"                 // holds input with invalid dates
 var inputFileBadAmount = "testdata/input_bad_amount.csv"             // holds input with invalid amounts
+var inputFileEmpty = "testdata/input_empty.csv"                      // holds input with no data
 
 // note: each test is run in a separate goroutine, and memory is shared between tests
 
@@ -209,5 +210,13 @@ func Test_WriteCSV_Bad_Amount(t *testing.T) {
 	transactions := processTransactions(readCSV(inputFileBadAmount))
 	if len((*transactions)) != 85 {
 		t.Errorf("Expected 85 transactions, got %v", len((*transactions)))
+	}
+}
+
+// test with an empty file
+func Test_WriteCSV_Empty_File(t *testing.T) {
+	transactions := processTransactions(readCSV(inputFileEmpty))
+	if len((*transactions)) != 0 {
+		t.Errorf("Expected 0 transactions, got %v", len((*transactions)))
 	}
 }
