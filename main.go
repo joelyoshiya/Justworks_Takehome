@@ -34,6 +34,10 @@ import (
 	"sync"
 )
 
+// DEFAULT PATHS
+var defaultInputFP = "data_raw_1.csv" // holds default input
+var defaultOutputFP = "output.csv"    // holds default
+
 // STRUCTS AND TYPES
 // Input csv is mapped to a list of transactions
 // transactions are each tied a user - custemerID is the unique identifier
@@ -115,6 +119,7 @@ func readCSV(filePath string) *csv.Reader {
 	file, err := os.Open(filePath)
 	if err != nil {
 		// if file does not exist, exit program
+		log.Fatal(err)
 		os.Exit(1)
 	}
 	// open csv reader and return the pointer
@@ -277,11 +282,6 @@ func storeBalances(users *Users) {
 			// transactions processed chronologically
 			return user.Transactions[i].Date < user.Transactions[j].Date
 		})
-		// print sorted transactions
-		fmt.Println("Sorted Transactions:")
-		for _, transaction := range user.Transactions {
-			fmt.Println(transaction)
-		}
 		for _, transaction := range user.Transactions {
 			// get month and year from date
 			date_arr := strings.Split(transaction.Date, "/")
@@ -389,11 +389,21 @@ func writeCSV(file *os.File, users *Users) {
 }
 
 func main() {
+	var input, output string
+	// Check for correct number of arguments
+	if len(os.Args) != 3 {
+		input = defaultInputFP
+		output = defaultOutputFP
+	} else {
+		input = os.Args[1]
+		output = os.Args[2]
+	}
+
 	// Create local storage
 	var users = NewUsers()
 
 	// Read CSV file
-	csvReader := readCSV("input/" + os.Args[1]) // input filepath is first argument
+	csvReader := readCSV("input/" + input) // input filepath is first argument
 
 	// Process transactions
 	transactions := processTransactions(csvReader)
@@ -405,7 +415,7 @@ func main() {
 	storeBalances(users)
 
 	// Create CSV file
-	file := createCSV("output/" + os.Args[2]) // output filepath is second argument
+	file := createCSV("output/" + output) // output filepath is second argument
 
 	// Write list of strings to CSV file
 	writeCSV(file, users)

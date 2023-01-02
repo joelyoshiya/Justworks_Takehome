@@ -79,7 +79,7 @@ If you have the specified version of Go installed, you can run the program local
 
 1. Clone the repo
 2. Insert your input csv file into the `input` folder
-3. Run `docker build -t justworks .` in the root directory of the project.
+3. Run `docker build -t justworks --build-arg input_file_name=data_raw_1.csv --build-arg output_file_name=output.csv .` in the root directory of the project.
 4. Run `docker run -it justworks [input_file_name] [output_file_name]` in the root directory of the project.
 5. The output file will be in the `output` folder
 
@@ -113,6 +113,7 @@ Tentatively, I plan to submit a zip file containing the following:
 - `testdata` - a folder containing the test data (used in `main_test.go`)
   - `testdata/input.csv` - the input csv file
   - `testdata/output.csv` - the output csv file
+- Dockerfile - the dockerfile used to build the docker image
 
 I also plan to leave a link to the github repo in the notes section of the submission form.
 
