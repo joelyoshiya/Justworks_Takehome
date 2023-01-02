@@ -7,8 +7,12 @@ import (
 )
 
 // static data for testing
-var inputFilePath = "testdata/input.csv"        // holds expected input
-var expectedOutFilePath = "testdata/output.csv" // holds expected output
+var inputFilePath = "testdata/input.csv"                             // holds expected input
+var expectedOutFilePath = "testdata/output.csv"                      // holds expected output
+var inputFileMonthMisordered = "testdata/input_month_misordered.csv" // holds input with month misordered
+var inputFileEmptyLines = "testdata/input_empty_lines.csv"           // holds input with empty lines
+var inputFileBadDate = "testdata/input_bad_date.csv"                 // holds input with invalid dates
+var inputFileBadAmount = "testdata/input_bad_amount.csv"             // holds input with invalid amounts
 
 // note: each test is run in a separate goroutine, and memory is shared between tests
 
@@ -128,4 +132,82 @@ func Test_WriteCSV(t *testing.T) {
 
 }
 
-// BAD INPUT TESTS
+// Non-Golden Path Tests
+func Test_WriteCSV_MonthMisordered(t *testing.T) {
+	users := NewUsers()
+	transactions := processTransactions(readCSV(inputFileMonthMisordered))
+	storeTransactions(users, transactions)
+	storeBalances(users)
+
+	// file name
+	var actualFilePath = "testdata/output_test_mm.csv"
+
+	// write to test file
+	actualFile := createCSV(actualFilePath)
+	writeCSV(actualFile, users)
+
+	// check that file contents are identical
+	expected, err := os.ReadFile(expectedOutFilePath)
+	if err != nil {
+		t.Errorf("Error reading expected file: %v", err)
+	}
+	actual, err := os.ReadFile(actualFilePath)
+	if err != nil {
+		t.Errorf("Error reading actual file: %v", err)
+	}
+	if !bytes.Equal(expected, actual) {
+		t.Errorf("Expected file contents to be identical, got %v", string(actual))
+	}
+
+	// delete test file
+	os.Remove(actualFilePath)
+
+}
+
+func Test_WriteCSV_Empty_Lines(t *testing.T) {
+	users := NewUsers()
+	transactions := processTransactions(readCSV(inputFileEmptyLines))
+	storeTransactions(users, transactions)
+	storeBalances(users)
+
+	// file name
+	var actualFilePath = "testdata/output_test_el.csv"
+
+	// write to test file
+	actualFile := createCSV(actualFilePath)
+	writeCSV(actualFile, users)
+
+	// check that file contents are identical
+	expected, err := os.ReadFile(expectedOutFilePath)
+	if err != nil {
+		t.Errorf("Error reading expected file: %v", err)
+	}
+	actual, err := os.ReadFile(actualFilePath)
+	if err != nil {
+		t.Errorf("Error reading actual file: %v", err)
+	}
+	if !bytes.Equal(expected, actual) {
+		t.Errorf("Expected file contents to be identical, got %v", string(actual))
+	}
+
+	// delete test file
+	os.Remove(actualFilePath)
+}
+
+// modified test to check for 85 transactions instead of 90
+// five transactions have invalid dates
+func Test_WriteCSV_Bad_Date(t *testing.T) {
+	transactions := processTransactions(readCSV(inputFileBadDate))
+	if len((*transactions)) != 85 {
+		t.Errorf("Expected 85 transactions, got %v", len((*transactions)))
+	}
+}
+
+// modified test to check for 85 transactions instead of 90
+// five transactions have invalid amounts
+func Test_WriteCSV_Bad_Amount(t *testing.T) {
+	transactions := processTransactions(readCSV(inputFileBadAmount))
+	if len((*transactions)) != 85 {
+		t.Errorf("Expected 85 transactions, got %v", len((*transactions)))
+	}
+}
