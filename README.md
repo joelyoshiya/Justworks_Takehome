@@ -66,7 +66,7 @@ I've used the following approach to handle edge cases:
 
 ## How to run
 
-If you have the specified version of Go installed, you can run the program locally. Otherwise, you can run the program in a docker container.
+If you have the specified version of Go installed, you can run the program locally. Otherwise, you can run the program in a docker container. If you wish to use the default input file (`data_raw_1.csv`, a replica of data in the Excel file), you can omit the input and output file names from either the `go run` or `docker run` commands.
 
 ### Locally
 
@@ -79,7 +79,7 @@ If you have the specified version of Go installed, you can run the program local
 
 1. Clone the repo
 2. Insert your input csv file into the `input` folder
-3. Run `docker build -t justworks --build-arg input_file_name=data_raw_1.csv --build-arg output_file_name=output.csv .` in the root directory of the project.
+3. Run `docker build -t justworks .` in the root directory of the project.
 4. Run `docker run -it justworks [input_file_name] [output_file_name]` in the root directory of the project.
 5. The output file will be in the `output` folder
 

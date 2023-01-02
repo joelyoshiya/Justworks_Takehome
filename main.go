@@ -28,6 +28,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"os/exec"
 	"sort"
 	"strconv"
 	"strings"
@@ -419,4 +420,9 @@ func main() {
 
 	// Write list of strings to CSV file
 	writeCSV(file, users)
+
+	// do unix cat on output file
+	cmd := exec.Command("cat", "output/"+output)
+	cmd.Stdout = os.Stdout
+	cmd.Run()
 }

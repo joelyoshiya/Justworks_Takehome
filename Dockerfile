@@ -7,16 +7,15 @@ WORKDIR /app
 COPY go.mod ./
 RUN go mod download && go mod verify
 
+# copy go files, readme
 COPY * .
-COPY input/* ./input/
-COPY output/* ./output/
-
-# Need to set the user arguments as environment variables
-ENV input_file_name=data_raw_1.csv
-ENV output_file_name=output.csv
+# copy input and output directories
+COPY input/ input/
+COPY output/ output/
 
 # compile the app
 RUN go build -o Justworks_TakeHome
 
-# run the app
-CMD ["./Justworks_TakeHome", ${input_file_name}, ${output_file_name}]
+# use an entrypoint to run the app
+ENTRYPOINT ["./Justworks_TakeHome"]
+
