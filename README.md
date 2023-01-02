@@ -73,27 +73,31 @@ If you have the specified version of Go installed, you can run the program local
 1. Clone the repo
 2. Insert your input csv file into the `input` folder
 3. Run `go run main.go [input_file_name] [output_file_name]` in the root directory of the project.
-4. The output file will be in the `output` folder
+4. The output file will be in the `output` folder, and file contents read to the console
 
 ### Docker
 
 1. Clone the repo
 2. Insert your input csv file into the `input` folder
 3. Run `docker build -t justworks .` in the root directory of the project.
-4. Run `docker run -it justworks [input_file_name] [output_file_name]` in the root directory of the project.
-5. The output file will be in the `output` folder
+4. Run `docker run justworks [input_file_name] [output_file_name]` in the root directory of the project.
+5. The output file contents will be read to the console
 
 ## How to test
 
-Run `go test` in the root directory of the project.
+Run `go test` in the root directory of the project. This can only be done locally.
 
 ## Discussion
 
 If I had time, here are the refactors I would do:
 
-- Make transaction/balance processing per transaction/day instead of all at once from input
-  - Make the code more modular
 - Imitate a live scenario where new transactions instantly update balance live
+  - Want strong coupling between new transactions and updated balances, so that the balance is always up to date. We want an ACID compliant database in this situation.
+- Make transaction/balance processing per transaction instead of for all input transactions
+  - Enable the prior point to happen
+  - Make the code more modular
+  - Have smaller function scope
+    - Allows for more modularity/extendability
 - Use a Time.time object for the date field
 
 ## Conclusion

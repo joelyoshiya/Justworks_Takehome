@@ -1,6 +1,7 @@
 # alpine chosen for small footprint
 FROM golang:1.19.4-alpine
 
+# set working directory
 WORKDIR /app
 
 # pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them in subsequent builds if they change
