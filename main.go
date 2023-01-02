@@ -277,14 +277,19 @@ func storeBalances(users *Users) {
 	// get transactions for each user
 	for _, user := range users.UserMap {
 		sort.Slice(user.Transactions, func(i, j int) bool {
+			// if dates are equal, sort by amount
+			if user.Transactions[i].Date == user.Transactions[j].Date {
+				// start by calculating credits before debits for any given day
+				return user.Transactions[i].Amount > user.Transactions[j].Amount
+			}
+			// transactions processed chronologically
 			return user.Transactions[i].Date < user.Transactions[j].Date
 		})
-		// print out the sorted transactions
+		// print sorted transactions
 		fmt.Println("Sorted Transactions:")
 		for _, transaction := range user.Transactions {
 			fmt.Println(transaction)
 		}
-
 		for _, transaction := range user.Transactions {
 			// get month and year from date
 			date_arr := strings.Split(transaction.Date, "/")
