@@ -252,11 +252,28 @@ func storeTransactions(users *Users, transactions *[]Transaction) {
 
 }
 
+// Transactions could be in any order of user/date/amount
+// Balances should only be calculated once per given day, not per transaction
+
+// TODO - account for situation where there are multiple transactions on the same day
+// Sort transactions by date before calculating balances
+// Then sort by positivity - apply credits befored debits for that day
+// One all transactions for a day are applied, calculate the ending balance
+// Then, check if the ending balance qualifies as a min/max balance for all days in the month
+
 // calculates and stores balances based on transactions for a single user
 func storeBalances(users *Users) {
 	// get transactions for each user
 	for _, user := range users.UserMap {
-		// TODO - sort transactions by date before calculating balances
+		sort.Slice(user.Transactions, func(i, j int) bool {
+			return user.Transactions[i].Date < user.Transactions[j].Date
+		})
+		// print out the sorted transactions
+		fmt.Println("Sorted Transactions:")
+		for _, transaction := range user.Transactions {
+			fmt.Println(transaction)
+		}
+
 		for _, transaction := range user.Transactions {
 			// get month and year from date
 			date_arr := strings.Split(transaction.Date, "/")
@@ -303,6 +320,7 @@ func storeBalances(users *Users) {
 	}
 }
 
+// generate a brand new CSV file with user-created name
 func createCSV(fileName string) *os.File {
 	// open file writer
 	file, err := os.Create(fileName)
