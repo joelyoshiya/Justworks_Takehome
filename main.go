@@ -189,6 +189,15 @@ func validateLine(line []string) bool {
 	return true
 }
 
+// to clean the line for whitespace
+func cleanLine(line []string) []string {
+	// clean each line for whitespace
+	for i, item := range line {
+		line[i] = strings.TrimSpace(item)
+	}
+	return line
+}
+
 // opens a file and reads it into a list of transactions
 func processTransactions(csvReader *csv.Reader) *[]Transaction {
 	// create a list of transactions
@@ -201,6 +210,8 @@ func processTransactions(csvReader *csv.Reader) *[]Transaction {
 			// fmt.Println("Error: ", err)
 			break
 		}
+		// clean lines for whitespace
+		line = cleanLine(line)
 		// validate line
 		if !validateLine(line) {
 			// fmt.Println("Error: Invalid line.")
