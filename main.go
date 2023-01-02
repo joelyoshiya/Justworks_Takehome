@@ -20,12 +20,6 @@
 // Then, have a function that takes in a list of balances and returns a list of strings that can be written to a csv file. The function will iterate through the list of balances and create a string for each balance. The function will return a list of strings.
 // Finally, have a filewriter that takes in a list of strings and writes them to a csv file. Output the
 
-// TODO
-// Reconsider separation of transactions and balance logic
-// We want to imitate a live scenario -> as soon as we have a transaction, we want to calculate the balance for that month
-// As new transactions role in for that monthh -> we want to update the balance for that month
-// After all transactions have been processed for that month -> we will output balances for each month for which there is at least one transaction
-
 package main
 
 import (
@@ -170,6 +164,7 @@ func validateDate(date string) bool {
 	return true
 }
 
+// to validate that the customerID, date, and amount are valid
 func validateLine(line []string) bool {
 	// check for valid customerID
 	if line[0] == "" {
@@ -257,6 +252,7 @@ func storeTransactions(users *Users, transactions *[]Transaction) {
 
 }
 
+// calculates and stores balances based on transactions for a single user
 func storeBalances(users *Users) {
 	// get transactions for each user
 	for _, user := range users.UserMap {
@@ -305,7 +301,6 @@ func storeBalances(users *Users) {
 			users.UserMap[user.CustomerID] = user
 		}
 	}
-
 }
 
 func createCSV(fileName string) *os.File {
@@ -317,9 +312,8 @@ func createCSV(fileName string) *os.File {
 	return file
 }
 
-// retrieve balances from local storage, sorted by customerID
-// write balances to CSV file
-// want sorted by customerID, then year, then month
+// retrieves balances from local storage, sorted by customerID
+// writes balances to CSV file sorted by customerID, then year, then month
 func writeCSV(file *os.File, users *Users) {
 	// grab userIDs from local storage, then sort userIDs
 	sortedCustomerIDs := make([]string, 0)
@@ -389,5 +383,4 @@ func main() {
 
 	// Write list of strings to CSV file
 	writeCSV(file, users)
-
 }
